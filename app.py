@@ -16,8 +16,6 @@ app.secret_key = os.getenv("DASHBOARD_SECRET", "spf-monitor-secret-change-me")
 
 DASHBOARD_PASSWORD = os.getenv("DASHBOARD_PASSWORD", "spfmonitor2026")
 
-database.init()
-
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 def login_required(f):
@@ -307,6 +305,15 @@ DASHBOARD_HTML = """
 </body>
 </html>
 """
+
+@app.before_request
+def setup():
+    if not getattr(app, "_db_ready", False):
+        try:
+            database.init()
+            app._db_ready = True
+        except Exception as e:
+            pass
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
